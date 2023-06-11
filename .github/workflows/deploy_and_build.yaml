@@ -23,7 +23,7 @@ on:
 #          push: true
 #          tags: ${{ secrets.DOCKERHUB_USERNAME }}/todolist:latest
 
-  deploy:
+deploy:
 #   needs: build
    runs-on: ubuntu-latest
    steps:
