@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db_postgres:
-    image: postgres:12.4-alpine
+    image: postgres:12.4
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
@@ -14,14 +14,12 @@ services:
       retries: 15
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+
 
   migrations:
-    build: .
+    image: el7futuro/todolist:latest
     env_file: .env
-    environment:
-      DB_HOST: db_postgres
+
     depends_on:
       db_postgres:
         condition: service_healthy
@@ -30,22 +28,16 @@ services:
   api:
     build: .
     env_file: .env
-    environment:
-      DB_HOST: db_postgres
-    ports:
-      - 8000:8000
+
     depends_on:
 #      db_postgres:
 #        condition: service_healthy
       migrations:
         condition: service_completed_successfully
-    volumes:
-      - ./todolist:/opt/todolist/todolist
-      - ./core:/opt/todolist/core
 
 
   collect_static:
-    build: .
+    image: el7futuro/todolist:latest
     env_file: .env
     command: python manage.py collectstatic -c --no-input
     volumes:
