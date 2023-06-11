@@ -24,8 +24,9 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/todolist:latest
 
 deploy:
-  needs: build
+
   runs-on: ubuntu-latest
+  needs: build
   steps:
      - uses: actions/checkout@v3
 
