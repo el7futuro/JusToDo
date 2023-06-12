@@ -1,6 +1,6 @@
 name: Build and deploy action
 on:  push
-branches:
+  branches:
   - 'main'
 
 jobs:
