@@ -1,8 +1,9 @@
 name: Build and deploy action
 
 on:  workflow_dispatch
-  branches:
-    - 'main'
+  push:
+    branches:
+      - 'main'
 
 jobs:
   build:
