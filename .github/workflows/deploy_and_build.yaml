@@ -1,8 +1,8 @@
 name: Build and deploy action
 
 on:  push
-    branches:
-      - 'main'
+  branches:
+    - 'main'
 
 jobs:
   build:
