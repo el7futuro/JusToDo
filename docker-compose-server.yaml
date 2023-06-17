@@ -17,7 +17,7 @@ services:
 
 
   migrations:
-    image: el7futuro/todolist:latest
+    image: ${DOCKERHUB_USERNAME}/todolist:latest
     env_file: .env
 
     depends_on:
@@ -37,7 +37,7 @@ services:
 
 
   collect_static:
-    image: el7futuro/todolist:latest
+    image: ${DOCKERHUB_USERNAME}/todolist:latest
     env_file: .env
     command: python manage.py collectstatic -c --no-input
     volumes:
