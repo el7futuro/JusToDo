@@ -3,7 +3,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import permissions
 from rest_framework.pagination import LimitOffsetPagination
 from .filters import GoalDateFilter, CommentFilter
-from .models import GoalCategory, Goal, GoalComment
+from .models import GoalCategory, Goal, GoalComment, Status
 
 from rest_framework.generics import (
     CreateAPIView,
@@ -40,7 +40,7 @@ class GoalCategoryListView(ListAPIView):
     search_fields = ['title']
 
     def get_queryset(self):
-        return GoalCategory.objects.filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.select_related('user').filter(user=self.request.user, is_deleted=False)
 
 
 class GoalCategoryView(RetrieveUpdateDestroyAPIView):
@@ -51,12 +51,11 @@ class GoalCategoryView(RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return GoalCategory.objects.filter(user=self.request.user, is_deleted=False)
 
-    def perform_destroy(self, instance: GoalCategory):
+    def perform_destroy(self, instance):
+        """
+        При "удалении" категории просто помечаем ее как is_deleted = True
+        """
         instance.is_deleted = True
-        goals = instance.goals.all()
-        for goal in goals:
-            goal.status = 4
-            goal.save()
         instance.save()
         return instance
 
@@ -83,7 +82,7 @@ class GoalListView(ListAPIView):
     search_fields = ['title', 'description']
 
     def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user, status__in=[1, 2, 3], category__is_deleted=False)
+        return Goal.objects.select_related('user').filter(user=self.request.user, status__in=[1, 2, 3], category__is_deleted=False)
 
 
 class GoalView(RetrieveUpdateDestroyAPIView):
@@ -95,9 +94,8 @@ class GoalView(RetrieveUpdateDestroyAPIView):
         return Goal.objects.filter(user=self.request.user, status__in=[1, 2, 3], category__is_deleted=False)
 
     def perform_destroy(self, instance: Goal):
-        instance.status = 4
+        instance.status = Status.archived
         instance.save()
-        return instance
 
 
 class GoalCommentCreateView(CreateAPIView):
@@ -120,7 +118,7 @@ class GoalCommentListView(ListAPIView):
     ordering = ['-created']
 
     def get_queryset(self):
-        return GoalComment.objects.filter(user=self.request.user)
+        return GoalComment.objects.select_related('user').filter(user=self.request.user)
 
 
 class GoalCommentView(RetrieveUpdateDestroyAPIView):
