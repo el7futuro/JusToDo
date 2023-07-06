@@ -21,6 +21,9 @@ class Board(DatesModelMixin):
     title = models.CharField(verbose_name="Название", max_length=255)
     is_deleted = models.BooleanField(verbose_name="Удалена", default=False)
 
+    def __str__(self):
+        return self.title
+
 
 class BoardParticipant(DatesModelMixin):
     class Meta:
@@ -72,24 +75,22 @@ class GoalCategory(DatesModelMixin):
         return self.title
 
 
-class Status(models.IntegerChoices):
-    to_do = 1, "К выполнению"
-    in_progress = 2, "В процессе"
-    done = 3, "Выполнено"
-    archived = 4, "Архив"
-
-
-class Priority(models.IntegerChoices):
-    low = 1, "Низкий"
-    medium = 2, "Средний"
-    high = 3, "Высокий"
-    critical = 4, "Критический"
-
-
-class Goal(models.Model):
+class Goal(DatesModelMixin):
     class Meta:
         verbose_name = 'Цель'
         verbose_name_plural = 'Цели'
+
+    class Status(models.IntegerChoices):
+        to_do = 1, "К выполнению"
+        in_progress = 2, "В процессе"
+        done = 3, "Выполнено"
+        archived = 4, "Архив"
+
+    class Priority(models.IntegerChoices):
+        low = 1, "Низкий"
+        medium = 2, "Средний"
+        high = 3, "Высокий"
+        critical = 4, "Критический"
 
     title = models.CharField(verbose_name='Название', max_length=255)
     description = models.TextField(verbose_name='описание', max_length=255)
@@ -100,14 +101,12 @@ class Goal(models.Model):
     user = models.ForeignKey(User, verbose_name='автор', on_delete=models.PROTECT)
     category = models.ForeignKey(GoalCategory, verbose_name='категория', on_delete=models.PROTECT, related_name='goals')
     due_date = models.DateField(verbose_name='дедлайн', default=date.today, null=True)
-    created = models.DateTimeField(verbose_name='создано в', auto_now_add=True)
-    updated = models.DateTimeField(verbose_name='изменено в', auto_now=True)
 
     def __str__(self) -> str:
         return self.title
 
 
-class GoalComment(models.Model):
+class GoalComment(DatesModelMixin):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
@@ -115,8 +114,6 @@ class GoalComment(models.Model):
     goal = models.ForeignKey(Goal, verbose_name='цель', on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name='автор', on_delete=models.CASCADE)
     text = models.TextField(verbose_name='текст', max_length=255)
-    created = models.DateTimeField(verbose_name='создано в', auto_now_add=True)
-    updated = models.DateTimeField(verbose_name='изменено в', auto_now=True)
 
     def __str__(self) -> str:
         return self.title

@@ -1,9 +1,11 @@
+from django.db import transaction
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import permissions
 from rest_framework.pagination import LimitOffsetPagination
 from .filters import GoalDateFilter, CommentFilter
-from .models import GoalCategory, Goal, GoalComment, Status
+from .models import GoalCategory, Goal, GoalComment, Board
 
 from rest_framework.generics import (
     CreateAPIView,
@@ -14,9 +16,18 @@ from .serializers import (
     GoalCategoryCreateSerializer,
     GoalCategorySerializer,
     GoalCreateSerializer,
-    GoalSerializer, CommentCreateSerializer, CommentSerializer,
-    # CommentCreateSerializer,
-    # CommentSerializer
+    GoalSerializer,
+    CommentCreateSerializer,
+    CommentSerializer,
+    BoardCreateSerializer,
+    BoardSerializer,
+    BoardListSerializer
+)
+from .permissions import (
+    BoardPermissions,
+    IsOwnerOrReadOnly,
+    GoalPermissions,
+    CommentPermissions
 )
 
 
@@ -32,15 +43,18 @@ class GoalCategoryListView(ListAPIView):
     serializer_class = GoalCategorySerializer
     pagination_class = LimitOffsetPagination
     filter_backends = [
+        DjangoFilterBackend,
         OrderingFilter,
         SearchFilter,
     ]
-    ordering_fields = ['title', 'created']
-    ordering = ['-created']
-    search_fields = ['title']
+    filterset_fields = ["board"]
+    ordering_fields = ["title", "created"]
+    ordering = ["title"]
+    search_fields = ["title"]
 
     def get_queryset(self):
-        return GoalCategory.objects.select_related('user').filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.select_related('board__participants'). \
+            filter(board__participants__user=self.request.user, is_deleted=False)
 
 
 class GoalCategoryView(RetrieveUpdateDestroyAPIView):
@@ -49,7 +63,8 @@ class GoalCategoryView(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return GoalCategory.objects.filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.select_related('board__participants'). \
+            filter(board__participants__user=self.request.user, is_deleted=False)
 
     def perform_destroy(self, instance):
         """
@@ -82,19 +97,27 @@ class GoalListView(ListAPIView):
     search_fields = ['title', 'description']
 
     def get_queryset(self):
-        return Goal.objects.select_related('user').filter(user=self.request.user, status__in=[1, 2, 3], category__is_deleted=False)
+        return Goal.objects.filter(
+            Q(board__participants__user=self.request.user)
+            & ~Q(status=Goal.Status.archived)
+            & Q(category__is_deleted=False)
+        )
 
 
 class GoalView(RetrieveUpdateDestroyAPIView):
     model = Goal
     serializer_class = GoalSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [GoalPermissions]
 
     def get_queryset(self):
-        return Goal.objects.filter(user=self.request.user, status__in=[1, 2, 3], category__is_deleted=False)
+        return Goal.objects.filter(
+            Q(board__participants__user=self.request.user)
+            & ~Q(status=Goal.Status.archived)
+            & Q(category__is_deleted=False)
+        )
 
     def perform_destroy(self, instance: Goal):
-        instance.status = Status.archived
+        instance.status = Goal.Status.archived
         instance.save()
 
 
@@ -118,7 +141,7 @@ class GoalCommentListView(ListAPIView):
     ordering = ['-created']
 
     def get_queryset(self):
-        return GoalComment.objects.select_related('user').filter(user=self.request.user)
+        return GoalComment.objects.filter(goal__category__board__participants__user=self.request.user)
 
 
 class GoalCommentView(RetrieveUpdateDestroyAPIView):
@@ -128,3 +151,43 @@ class GoalCommentView(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return GoalComment.objects.filter(user=self.request.user)
+
+
+class BoardCreateView(CreateAPIView):
+    model = Board
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = BoardCreateSerializer
+
+
+class BoardView(RetrieveUpdateDestroyAPIView):
+    model = Board
+    permission_classes = [permissions.IsAuthenticated, BoardPermissions]
+    serializer_class = BoardSerializer
+
+    def get_queryset(self):
+        return Board.objects.filter(participants__user=self.request.user,
+                                    is_deleted=False)
+
+    def perform_destroy(self, instance: Board):
+        with transaction.atomic():
+            instance.is_deleted = True
+            instance.save()
+            instance.categories.update(is_deleted=True)
+            Goal.objects.filter(category__board=instance).update(status=Goal.Status.archived)
+
+        return instance
+
+
+class BoardListView(ListAPIView):
+    model = Board
+    permission_classes = [permissions.IsAuthenticated, BoardPermissions]
+    serializer_class = BoardListSerializer
+    pagination_class = LimitOffsetPagination
+    filter_backends = [
+        # DjangoFilterBackend,
+        OrderingFilter,
+    ]
+    ordering = ['-title']
+
+    def get_queryset(self):
+        return Board.objects.filter(participants__user=self.request.user, is_deleted=False)
