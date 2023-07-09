@@ -47,6 +47,7 @@ class GoalCategorySerializer(serializers.ModelSerializer):
 
 class GoalCreateSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    description = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
     class Meta:
         model = Goal
@@ -82,7 +83,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     def validate_goal(self, value: Goal):
         if value.status == 4:
             raise serializers.ValidationError('not allowed in archived goal')
-        if not value.board.participants.filter(role__in=[1, 2], user=self.context['request'].user):
+        if not value.category.board.participants.filter(role__in=[1, 2], user=self.context['request'].user):
             raise PermissionDenied({'non_field_errors': ["You don't have write permission"]})
 
         return value
@@ -127,15 +128,17 @@ class BoardParticipantSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    participants = BoardParticipantSerializer(many=True)
+    participants = BoardParticipantSerializer(many=True, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    title = serializers.CharField(max_length=255, required=False)
 
     class Meta:
         model = Board
         fields = '__all__'
         read_only_fields = ('id', 'created', 'updated')
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: dict):
+
         with transaction.atomic():
             instance.participants.exclude(user=self.context["request"].user).delete()
             if 'participants' in validated_data.keys():

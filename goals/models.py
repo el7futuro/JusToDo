@@ -116,4 +116,4 @@ class GoalComment(DatesModelMixin):
     text = models.TextField(verbose_name='текст', max_length=255)
 
     def __str__(self) -> str:
-        return self.title
+        return self.text
