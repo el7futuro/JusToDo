@@ -107,12 +107,13 @@ class BoardCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        user = validated_data.pop("user")
-        board = Board.objects.create(**validated_data)
-        BoardParticipant.objects.create(
-            user=user, board=board, role=BoardParticipant.Role.owner
-        )
-        return board
+        with transaction.atomic():
+            user = validated_data.pop("user")
+            board = Board.objects.create(**validated_data)
+            BoardParticipant.objects.create(
+                user=user, board=board, role=BoardParticipant.Role.owner
+            )
+            return board
 
 class BoardParticipantSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(required=True, choices=BoardParticipant.Role.choices)

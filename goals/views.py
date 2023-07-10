@@ -25,7 +25,6 @@ from .serializers import (
 )
 from .permissions import (
     BoardPermissions,
-    IsOwnerOrReadOnly,
     GoalPermissions,
     CommentPermissions
 )

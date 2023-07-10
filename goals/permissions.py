@@ -28,11 +28,11 @@ class GoalPermissions(permissions.IsAuthenticated):
         ).exists()
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj: GoalComment):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return obj.user_id == request.user.id
+# class IsOwnerOrReadOnly(permissions.BasePermission):
+#     def has_object_permission(self, request, view, obj: GoalComment):
+#         if request.method in permissions.SAFE_METHODS:
+#             return True
+#         return obj.user_id == request.user.id
 
 
 class CommentPermissions(permissions.IsAuthenticated):
