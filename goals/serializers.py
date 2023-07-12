@@ -16,24 +16,25 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated", "user", "board")
         fields = "__all__"
 
-    def validate_category(self, value):
-        if value.is_deleted:
-            raise serializers.ValidationError("not allowed in deleted category")
-
-        if value.user != self.context["request"].user:
-            raise serializers.ValidationError("not owner of category")
-
+    def validate_board(self, value: Board) -> Board:
+        """
+        Проверка прав пользователя перед созданием категории
+        """
+        if not BoardParticipant.objects.filter(board_id=value.pk,
+                                               user_id=self.context["request"].user.id,
+                                               role__in=[BoardParticipant.Role.owner, BoardParticipant.Role.writer]):
+            raise serializers.ValidationError("Permission Denied")
         return value
 
-    def create(self, validated_data):
-        board_id = self.initial_data.pop('board', None)
-        board = get_object_or_404(Board, pk=board_id)
-
-        if not board.participants.filter(user=self.context['request'].user.pk, role__in=[1, 2]).exists():
-            raise PermissionDenied({'non_field_errors': ["You don't have write permission"]})
-
-        category = GoalCategory.objects.create(**validated_data, board=board)
-        return category
+    # def create(self, validated_data):
+    #     board_id = self.initial_data.pop('board', None)
+    #     board = get_object_or_404(Board, pk=board_id)
+    #
+    #     if not board.participants.filter(user=self.context['request'].user.pk, role__in=[1, 2]).exists():
+    #         raise PermissionDenied({'non_field_errors': ["You don't have write permission"]})
+    #
+    #     category = GoalCategory.objects.create(**validated_data, board=board)
+    #     return category
 
 
 class GoalCategorySerializer(serializers.ModelSerializer):
