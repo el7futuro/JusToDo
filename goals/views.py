@@ -118,6 +118,7 @@ class GoalView(RetrieveUpdateDestroyAPIView):
         instance.save()
 
 
+
 class GoalCommentCreateView(CreateAPIView):
     model = GoalComment
     permission_classes = [permissions.IsAuthenticated]

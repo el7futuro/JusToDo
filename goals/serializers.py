@@ -16,6 +16,7 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created", "updated", "user", "board")
         fields = "__all__"
 
+
     def validate_board(self, value: Board) -> Board:
         """
         Проверка прав пользователя перед созданием категории
