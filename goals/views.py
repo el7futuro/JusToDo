@@ -53,7 +53,7 @@ class GoalCategoryListView(ListAPIView):
 
     def get_queryset(self):
         return GoalCategory.objects.filter(
-            category__board__participants__user=self.request.user
+            board__participants__user=self.request.user
         ).exclude(is_deleted=True)
 
 
@@ -63,9 +63,8 @@ class GoalCategoryView(RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return GoalCategory.objects.filter(
-            board__participants__user=self.request.user
-        ).exclude(is_deleted=True)
+        return GoalCategory.objects.prefetch_related("board__participants"). \
+            filter(board__participants__user=self.request.user)
 
     def perform_destroy(self, instance):
         """
@@ -99,8 +98,8 @@ class GoalListView(ListAPIView):
 
     def get_queryset(self):
         return Goal.objects.filter(
-            category__participants__user=self.request.user, category__is_deleted=False
-        ).exclude(status=Goal.Status.archived)
+            category__board__participants__user=self.request.user
+        )
 
 
 class GoalView(RetrieveUpdateDestroyAPIView):
@@ -110,13 +109,13 @@ class GoalView(RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Goal.objects.filter(
-            category__participants__user=self.request.user, category__is_deleted=False
-        ).exclude(status=Goal.Status.archived)
+            ~Q(status=Goal.Status.archived)
+            & Q(category__is_deleted=False)
+        )
 
     def perform_destroy(self, instance: Goal):
         instance.status = Goal.Status.archived
         instance.save()
-
 
 
 class GoalCommentCreateView(CreateAPIView):

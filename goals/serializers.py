@@ -13,9 +13,8 @@ class GoalCategoryCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GoalCategory
-        read_only_fields = ("id", "created", "updated", "user", "board")
+        read_only_fields = ("id", "created", "updated", "user")
         fields = "__all__"
-
 
     def validate_board(self, value: Board) -> Board:
         """
@@ -44,7 +43,7 @@ class GoalCategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = GoalCategory
-        read_only_fields = ('id', 'created', 'updated', 'user', 'board')
+        read_only_fields = ('id', 'created', 'updated', 'user')
 
 
 class GoalCreateSerializer(serializers.ModelSerializer):
@@ -56,11 +55,14 @@ class GoalCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'created', 'updated', 'user')
 
-    def validate_category(self, value: GoalCategory):
+    def validate_category(self, value: GoalCategory) -> GoalCategory:
+        """
+        Проверка, есть ли у пользователя права на привязку цели к данной категории
+        """
         if value.is_deleted:
             raise serializers.ValidationError('not allowed in deleted category')
-        if not value.board.participants.filter(role__in=[1, 2], user=self.context['request'].user):
-            raise PermissionDenied({'non_field_errors': ["You don't have write permission"]})
+        if value.user != self.context["request"].user:
+            raise serializers.ValidationError("not owner of category")
 
         return value
 
@@ -85,8 +87,8 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     def validate_goal(self, value: Goal):
         if value.status == 4:
             raise serializers.ValidationError('not allowed in archived goal')
-        if not value.category.board.participants.filter(role__in=[1, 2], user=self.context['request'].user):
-            raise PermissionDenied({'non_field_errors': ["You don't have write permission"]})
+        if value.user != self.context["request"].user:
+            raise serializers.ValidationError("not owner of category")
 
         return value
 
@@ -116,6 +118,7 @@ class BoardCreateSerializer(serializers.ModelSerializer):
                 user=user, board=board, role=BoardParticipant.Role.owner
             )
             return board
+
 
 class BoardParticipantSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(required=True, choices=BoardParticipant.Role.choices)
