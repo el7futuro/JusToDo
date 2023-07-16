@@ -67,11 +67,15 @@ class GoalCategoryView(RetrieveUpdateDestroyAPIView):
             filter(board__participants__user=self.request.user)
 
     def perform_destroy(self, instance):
-        """
-        При "удалении" категории просто помечаем ее как is_deleted = True
-        """
-        instance.is_deleted = True
-        instance.save()
+        with transaction.atomic():
+            # Устанавливаем флаг is_deleted в True для экземпляра категории
+            instance.is_deleted = True
+            instance.save()
+
+            # Обновляем статус всех целей, связанных с данной категорией,
+            # устанавливая их статус в Goal.Status.archived
+            Goal.objects.filter(category=instance).update(status=Goal.Status.archived)
+
         return instance
 
 
