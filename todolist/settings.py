@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_filters',
     'goals',
     'core',
+    'bot',
 ]
 
 MIDDLEWARE = [
@@ -157,3 +158,4 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.vk.VKOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
+BOT_TOKEN = os.getenv('BOT_TOKEN')
