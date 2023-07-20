@@ -37,7 +37,7 @@ class Entity:
 @dataclass
 class Message:
     message_id: int
-    # sender: Sender = field(metadata={"data_key": "from"})
+    from_: Sender = field(metadata=dict(data_key='from', attribute='from_'))
     chat: Chat
     date: int
     text: str
