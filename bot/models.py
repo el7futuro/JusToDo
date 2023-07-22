@@ -16,13 +16,13 @@ class TgUser(models.Model):
     def __str__(self):
         return f'{self.__class__.__name__}  ({self.chat_id})'
 
-    # @staticmethod
-    # def _generate_verification_code():
-    #     return os.urandom(12).hex()
-    #
-    # def set_verification_code(self):
-    #     self.verification_code = self._generate_verification_code()
-    #     self.save(update_fields=['verification_code',])
-    #     return self.verification_code
+    @staticmethod
+    def _generate_verification_code():
+        return os.urandom(5).hex()
+
+    def set_verification_code(self):
+        self.verification_code = self._generate_verification_code()
+        self.save(update_fields=['verification_code'])
+        return self.verification_code
 
 

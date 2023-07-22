@@ -16,6 +16,7 @@ core_patterns = ([
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('core/', include(core_patterns)),
+    path('bot/', include('bot.urls', namespace='bot')),
     path('oauth/', include('social_django.urls', namespace="social")),
     path("goals/", include("goals.urls")),
 

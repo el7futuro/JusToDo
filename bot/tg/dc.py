@@ -9,6 +9,7 @@ class Sender:
     id: int
     is_bot: bool
     first_name: str
+    last_name: str
     username: str
     language_code: Optional[str]
 

@@ -7,3 +7,4 @@ django_filter==23.2
 marshmallow~=3.19.0
 django-filter~=23.2
 requests~=2.31.0
+marshmallow-dataclass==8.5.14

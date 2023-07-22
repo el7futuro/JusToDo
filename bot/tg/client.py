@@ -24,4 +24,6 @@ class TgClient:
         url = self.get_url('sendMessage')
         response = requests.get(url=url, params={'chat_id': chat_id, 'text': text})
         SendMessageResponseSchema = marshmallow_dataclass.class_schema(SendMessageResponse)
-        return SendMessageResponseSchema().loads(json.dumps(response.json()))
+        result = SendMessageResponseSchema().loads(json.dumps(response.json()))
+        print(SendMessageResponse)
+        return result
