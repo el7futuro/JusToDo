@@ -22,7 +22,7 @@ class Command(BaseCommand):
                 self.handle_message(item.message)
 
     def handle_message(self, message: Message):
-        self.tg_client.send_message(chat_id=message.from_.id, text=message.text)
+        # self.tg_client.send_message(chat_id=message.from_.id, text=message.text)
         tg_user, _created = TgUser.objects.get_or_create(
             chat_id=message.from_.id, defaults={'tg_username': message.from_.username})
 

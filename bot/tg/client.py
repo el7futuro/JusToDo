@@ -18,12 +18,14 @@ class TgClient:
         url = self.get_url('getUpdates')
         response = requests.get(url=url, params={'offset': offset, 'timeout': timeout})
         GetUpdatesResponseSchema = marshmallow_dataclass.class_schema(GetUpdatesResponse)
-        return GetUpdatesResponseSchema().loads(json.dumps(response.json()))
+        result = GetUpdatesResponseSchema().loads(json.dumps(response.json()))
+        print(result)
+        return result
 
     def send_message(self, chat_id: int, text: str) -> SendMessageResponse:
         url = self.get_url('sendMessage')
         response = requests.get(url=url, params={'chat_id': chat_id, 'text': text})
         SendMessageResponseSchema = marshmallow_dataclass.class_schema(SendMessageResponse)
         result = SendMessageResponseSchema().loads(json.dumps(response.json()))
-        print(SendMessageResponse)
+        print(result)
         return result

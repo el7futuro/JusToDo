@@ -102,7 +102,9 @@ class GoalListView(ListAPIView):
 
     def get_queryset(self):
         return Goal.objects.filter(
-            category__board__participants__user=self.request.user
+            Q(category__board__participants__user=self.request.user)
+            & ~Q(status=Goal.Status.archived)
+            & Q(category__is_deleted=False)
         )
 
 
