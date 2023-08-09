@@ -17,7 +17,7 @@ class BotCommands:
             & ~Q(status=Goal.Status.archived)
             & Q(category__is_deleted=False)
         )
-        message_text = 'Список целей:'
+        message_text = 'Список целей: '
         for goal in goals:
             message_text += f'#{goal.id} {goal.title} \n'
         self.client.send_message(self.user.chat_id, message_text)

@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from marshmallow import EXCLUDE
 from typing import List, Optional
 
-
 @dataclass
 class Sender:
     id: int

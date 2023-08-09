@@ -2,7 +2,6 @@ import json
 
 from rest_framework import permissions
 from rest_framework import serializers
-
 from rest_framework.generics import UpdateAPIView, GenericAPIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response

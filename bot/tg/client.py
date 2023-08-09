@@ -16,10 +16,11 @@ class TgClient:
 
     def get_updates(self, offset: int = 0, timeout: int = 60) -> GetUpdatesResponse:
         url = self.get_url('getUpdates')
-        response = requests.get(url=url, params={'offset': offset, 'timeout': timeout})
+        response = requests.request("GET",url=url, params={'offset': offset, 'timeout': timeout})
+        print(response.text)
         GetUpdatesResponseSchema = marshmallow_dataclass.class_schema(GetUpdatesResponse)
         result = GetUpdatesResponseSchema().loads(json.dumps(response.json()))
-        print(result)
+
         return result
 
     def send_message(self, chat_id: int, text: str) -> SendMessageResponse:

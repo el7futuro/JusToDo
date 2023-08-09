@@ -14,7 +14,6 @@ class Command(BaseCommand):
         self.offset = 0
 
     def handle(self, *args, **options):
-
         while True:
             res = self.tg_client.get_updates(offset=self.offset)
             for item in res.result:
