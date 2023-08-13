@@ -69,6 +69,7 @@ services:
   telegram_bot:
     build: .
     env_file: .env
+    dns: 8.8.8.8
     depends_on:
       db_postgres:
         condition: service_healthy
