@@ -59,7 +59,7 @@ services:
         - .django_static:/usr/share/nginx/html/static
 #
   telegram_bot:
-    build: .
+    image: ${DOCKERHUB_USERNAME}/todolist:latest
     env_file: .env
     dns: 8.8.8.8
     depends_on:
