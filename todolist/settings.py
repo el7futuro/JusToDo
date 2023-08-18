@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'social_django',
     'django_filters',
     'goals',
-    'core',
+    'core_test',
     'bot',
 ]
 
@@ -140,7 +140,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'core_test.User'
 
  # VK
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
