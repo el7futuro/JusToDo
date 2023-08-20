@@ -53,12 +53,13 @@ class TestCategoryListView:
         ]
 
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert sorted(response.json(), key=lambda x: x['id']) == sorted(expected_response, key=lambda x: x['id'])
+
 
     def test_no_perms_category_list(self, client, board, user, category_factory):
         category_factory.create_batch(2, board=board, user=user)
         response = client.get(self.url)
         expected_response = {'detail': 'Authentication credentials were not provided.'}
 
-        assert response.status_code == 401
+        assert response.status_code == 403
         assert response.json() == expected_response

@@ -41,7 +41,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./todolist:/opt/todolist/todolist
-      - ./core_test:/opt/todolist/core_test
+      - ./core:/opt/todolist/core
 
 
   collect_static:

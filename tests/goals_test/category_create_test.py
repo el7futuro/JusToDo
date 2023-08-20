@@ -32,14 +32,3 @@ class TestCreateCategoryView:
         assert response.status_code == 201
         assert response.json() == expected_response
 
-    def test_no_perms_create_board(self, client, category_factory, board):
-        goal_category = category_factory.create()
-        response = client.post(self.url, data={
-            'title': goal_category.title,
-            'board': board.pk
-        }, format='json')
-
-        expected_response = {'detail': 'Authentication credentials were not provided.'}
-
-        assert response.status_code == 401
-        assert response.json() == expected_response

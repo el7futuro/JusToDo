@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework import permissions
 from rest_framework.pagination import LimitOffsetPagination
@@ -111,6 +112,7 @@ class GoalListView(ListAPIView):
 class GoalView(RetrieveUpdateDestroyAPIView):
     model = Goal
     serializer_class = GoalSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [GoalPermissions]
 
     def get_queryset(self):
@@ -150,6 +152,7 @@ class GoalCommentListView(ListAPIView):
 class GoalCommentView(RetrieveUpdateDestroyAPIView):
     model = GoalComment
     serializer_class = CommentSerializer
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -165,6 +168,7 @@ class BoardCreateView(CreateAPIView):
 class BoardView(RetrieveUpdateDestroyAPIView):
     model = Board
     permission_classes = [permissions.IsAuthenticated, BoardPermissions]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     serializer_class = BoardSerializer
 
     def get_queryset(self):

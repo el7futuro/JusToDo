@@ -1,6 +1,8 @@
+
 import pytest
 from pytest_factoryboy import register
-from goals.models import Board, GoalCategory, Goal
+from goals.models import Goal, GoalCategory, Board
+
 from tests.factories import (
     UserFactory,
     BoardFactory,
@@ -8,6 +10,7 @@ from tests.factories import (
     GoalFactory,
     CommentFactory
 )
+
 
 pytest_plugins = 'tests.fixtures'
 

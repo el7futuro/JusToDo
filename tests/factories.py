@@ -1,4 +1,4 @@
-from core_test.models import User
+from core.models import User
 import factory.fuzzy
 from goals.models import (
     Board,

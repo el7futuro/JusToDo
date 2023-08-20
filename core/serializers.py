@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from core.models import User
@@ -33,9 +34,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
         validated_data['password'] = make_password(validated_data['password'])
         user = User(
             username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            email=validated_data['email'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            email=validated_data.get('email', ''),
             password=validated_data['password'],
         )
         user.save()
@@ -78,8 +79,20 @@ class UpdatePasswordSerializer(serializers.Serializer):
     """
     model = User
 
-    old_password = PasswordField(required=True)
-    new_password = PasswordField(required=True)
+    old_password = PasswordField(required=True, write_only=True)
+    new_password = PasswordField(required=True, write_only=True)
+    new_password_confirm = PasswordField(required=True, write_only=True)
+
+    def validate(self, data):
+        new_password = data['new_password']
+        new_password_confirm = data['new_password_confirm']
+
+        if new_password != new_password_confirm:
+            raise serializers.ValidationError({"new_password_confirm": "Пароли не совпадают"})
+
+        validate_password(new_password)
+
+        return data
 
     def validate_old_password(self, old_password: str) -> str:
         """

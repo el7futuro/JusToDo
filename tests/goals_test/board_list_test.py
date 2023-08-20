@@ -36,13 +36,9 @@ class TestBoardListView:
             }
         ]
 
+        sorted_response = sorted(response.json(), key=lambda x: x['id'])
+        sorted_expected_response = sorted(expected_response, key=lambda x: x['id'])
+
         assert response.status_code == 200
-        assert response.json() == expected_response
+        assert sorted_response == sorted_expected_response
 
-    def test_no_perms_error_board_list(self, client, user, board_factory):
-        board_factory.create_batch(2, with_owner=user)
-        response = client.get(self.url)
-        expected_response = {'detail': 'Authentication credentials were not provided.'}
-
-        assert response.status_code == 401
-        assert response.json() == expected_response

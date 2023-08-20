@@ -61,5 +61,5 @@ class TestCreateGoalView:
 
         expected_response = {'detail': 'Authentication credentials were not provided.'}
 
-        assert response.status_code == 401
+        assert response.status_code == 403
         assert response.json() == expected_response

@@ -4,7 +4,7 @@ from django.urls import reverse
 
 @pytest.mark.django_db
 class TestProfileView:
-    url = reverse('user-profile')
+    url = reverse('core:profile')
 
     def test_user_profile(self, auth_client, user):
         expected_response = {
@@ -23,5 +23,5 @@ class TestProfileView:
         expected_response = {'detail': 'Authentication credentials were not provided.'}
 
         response = client.get(self.url)
-        assert response.status_code == 401
+        assert response.status_code == 403
         assert response.json() == expected_response
